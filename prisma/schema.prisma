@@ -1,0 +1,67 @@
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL") // CLI needs this
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum UserRoleEnum {
+  SUPERADMIN
+  ADMIN
+  USER
+}
+
+enum NoticeType {
+  GENERAL
+  ALERT
+  REMINDER
+}
+
+enum NoticeStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+enum TargetType {
+  EMPLOYEE
+  TEAM
+  ALL
+}
+
+model User {
+  id       String       @id @default(auto()) @map("_id") @db.ObjectId
+  name     String
+  email    String       @unique
+  password String
+  role     UserRoleEnum
+}
+
+model Notice {
+  id          String       @id @default(auto()) @map("_id") @db.ObjectId
+  title       String
+  body        String
+  publishDate DateTime
+  targetType  TargetType
+  noticeType  NoticeType
+  status      NoticeStatus @default(DRAFT)
+
+  employeeId   String? // optional
+  employeeName String? // optional
+  position     String? // optional
+
+  attachments Attachment[]
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+}
+
+model Attachment {
+  id       String @id @default(auto()) @map("_id") @db.ObjectId
+  noticeId String @db.ObjectId
+  fileName String
+  fileUrl  String
+  fileType String
+  notice   Notice @relation(fields: [noticeId], references: [id], onDelete: Cascade)
+}
