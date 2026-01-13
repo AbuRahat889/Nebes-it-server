@@ -8,14 +8,23 @@ dotenv.config();
 
 const app = express();
 
-// Middleware
-app.options(
-  '*',
+// CORS setup - applied globally
+const allowedOrigins = ['http://localhost:3000', 'http://206.162.244.142:3019'];
+
+app.use(
   cors({
-    origin: ['http://localhost:3000', 'http://206.162.244.142:3019'],
+    origin: function (origin, callback) {
+      if (!origin) return callback(null, true); // allow non-browser requests
+      if (allowedOrigins.indexOf(origin) === -1) {
+        return callback(new Error('CORS not allowed'), false);
+      }
+      return callback(null, true);
+    },
     credentials: true,
   }),
 );
+
+// Middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
