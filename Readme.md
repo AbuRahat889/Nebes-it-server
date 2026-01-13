@@ -1,51 +1,98 @@
-# Server with Typescript, PostgreSQL, Prisma and zod validation
+# Backend – Project Name
 
-## How to run this project
+## 📌 Project Overview
 
----
+This backend API is built with Node.js and Express.js to manage notices and user data efficiently.
+It supports:
 
-### Clone the project
-
-    git clone repository-url
-
-### Go to project folder
-
-    cd project_name
-
-### Install dependencies
-
-    npm install
-
-### Open project to vscode
-
-    code .
-
-### Open terminal & Run project
-
-    npm run dev
-
-### Build project for deploying
-
-    npm run build
-
-### Run build project
-
-    npm run start:prod
-
-## Technology used
+* Creating, updating, and deleting notices
+* Handling file uploads (images)
+* Role-based access for admins and users
+* API endpoints to serve data to a frontend application
 
 ---
 
-- PostgreSQL (Database)
-- Prisma ORM
-- Express
-- Typescript
-- Zod (Validation)
-- JWT-token
-- Bcrypt (Hashing)
-- Moment (Date formatting)
+## 🛠️ Tech Stack
+
+* **Backend:** Node.js, Express.js
+* **Database:** MongoDB / PostgreSQL (via Mongoose / Prisma)
+* **Authentication:** JWT
+* **File Handling:** Multer
+* **Other Tools:** CORS, dotenv
 
 ---
 
-Happy Coding - Developeremdad 🧑‍💻
-# backend-template
+## ⚙️ Installation Steps
+
+### 1️⃣ Clone the Repository
+
+```bash
+git clone https://github.com/your-username/your-backend-repo.git
+cd your-backend-repo
+```
+
+### 2️⃣ Install Dependencies
+
+```bash
+npm install
+```
+
+### 3️⃣ Setup Environment Variables
+
+Create a `.env` file in the root directory (see next section for details).
+
+---
+
+## 🔐 Environment Variables Instructions
+
+### `.env`
+
+```env
+PORT=5000
+DATABASE_URL=your_database_connection_string
+JWT_SECRET=your_jwt_secret
+CORS_ORIGIN=http://localhost:3019
+UPLOAD_PATH=uploads
+```
+
+> ⚠️ Never commit your `.env` file. Use `.env.example` for reference instead.
+
+---
+
+## ▶️ Run the Backend
+
+```bash
+npm run dev
+```
+
+Open your browser or Postman and access:
+
+```
+http://localhost:5000/api/v1
+```
+
+---
+
+## 📂 Folder Structure (Optional)
+
+```text
+backend/
+│── controllers/
+│── models/
+│── routes/
+│── middlewares/
+│── uploads/
+│── server.js
+│── package.json
+│── .env
+```
+
+---
+
+## ✅ Notes
+
+* Ensure MongoDB / PostgreSQL is running
+* Check CORS_ORIGIN if frontend cannot access backend
+* Use correct database connection string
+
+---
