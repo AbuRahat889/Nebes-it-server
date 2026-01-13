@@ -1,73 +1,92 @@
 import { NoticeStatus, NoticeType, TargetType } from '@prisma/client';
 import { Request, Response } from 'express';
 import prisma from '../../utils/prisma';
-import axios from 'axios';
-import FormData from 'form-data';
-import fs from 'fs';
-import path from 'path';
 
 /**
  * CREATE NOTICE
  */
-
 export const createNotice = async (req: Request, res: Response) => {
   try {
-    // Parse notice JSON sent in 'notice' field
-    const noticeData = req.body.notice ? JSON.parse(req.body.notice) : {};
-    const { title, body, publishDate, targetType, noticeType } = noticeData;
+    let noticeData;
 
+    // ✅ Handle all cases safely
+    if (req.body.notice) {
+      noticeData =
+        typeof req.body.notice === 'string'
+          ? JSON.parse(req.body.notice)
+          : req.body.notice;
+    } else {
+      noticeData = req.body;
+    }
+
+    // ✅ Guard clause
+    if (!noticeData) {
+      return res.status(400).json({
+        success: false,
+        message: 'Notice data is missing',
+      });
+    }
+
+    const {
+      title,
+      body,
+      publishDate,
+      targetType,
+      noticeType,
+      employeeId,
+      employeeName,
+      position,
+      attachments,
+    } = noticeData;
+
+    // ✅ Required field validation
     if (!title || !body || !publishDate || !targetType || !noticeType) {
-      return res
-        .status(400)
-        .json({ success: false, message: 'Missing required fields' });
+      return res.status(400).json({
+        success: false,
+        message: 'Missing required fields',
+      });
     }
 
-    let attachmentData;
-
-    const file = req.file; // single file from Multer (memory storage)
-
-    if (file) {
-      // Upload to ImgBB
-      const form = new FormData();
-      form.append('image', file.buffer.toString('base64')); // buffer → base64
-      form.append('name', file.originalname);
-
-      const response = await axios.post(
-        `https://api.imgbb.com/1/upload?key=${process.env.IMGBB_API_KEY}`,
-        form,
-        { headers: form.getHeaders() },
-      );
-
-      attachmentData = {
-        fileName: file.originalname,
-        fileType: file.mimetype,
-        fileUrl: response.data.data.url, // ImgBB URL
-      };
-
-      // Optional: Save local copy
-      // const fs = require('fs');
-      // const path = require('path');
-      // const localPath = path.join(process.cwd(), 'uploads', `${Date.now()}-${file.originalname}`);
-      // fs.writeFileSync(localPath, file.buffer);
-      // attachmentData.localPath = localPath;
+    // ✅ Enum validation (CRITICAL)
+    if (!Object.values(TargetType).includes(targetType)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid targetType',
+      });
     }
 
-    // Save notice in Prisma
+    if (!Object.values(NoticeType).includes(noticeType)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid noticeType',
+      });
+    }
+
     const notice = await prisma.notice.create({
       data: {
-        ...noticeData,
-        publishDate: new Date(noticeData.publishDate),
-        attachments: attachmentData ? { create: attachmentData } : undefined,
+        title,
+        body,
+        publishDate: new Date(publishDate),
+        targetType,
+        noticeType,
+        status: NoticeStatus.DRAFT,
+        employeeId,
+        employeeName,
+        position,
+        attachments,
       },
-      include: { attachments: true },
     });
 
-    res.status(201).json({ success: true, data: notice });
+    return res.status(201).json({
+      success: true,
+      data: notice,
+    });
   } catch (error) {
-    console.error(error);
-    res
-      .status(500)
-      .json({ success: false, message: 'Failed to create notice', error });
+    console.error('Create Notice Error:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'Failed to create notice',
+    });
   }
 };
 
