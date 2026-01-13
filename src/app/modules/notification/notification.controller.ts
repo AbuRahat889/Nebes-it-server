@@ -1,6 +1,7 @@
 import { NoticeStatus, NoticeType, TargetType } from '@prisma/client';
 import { Request, Response } from 'express';
 import prisma from '../../utils/prisma';
+import { calculatePagination } from '../../utils/calculatePagination';
 
 /**
  * CREATE NOTICE
@@ -96,15 +97,91 @@ export const createNotice = async (req: Request, res: Response) => {
  */
 export const getAllNotices = async (req: Request, res: Response) => {
   try {
-    const { status } = req.query;
+    const {
+      page,
+      limit,
+      sortBy,
+      sortOrder,
+      employeeName,
+      targetType,
+      status,
+      publishDate,
+    } = req.query;
 
-    const notices = await prisma.notice.findMany({
-      where: status ? { status: status as NoticeStatus } : undefined,
-      orderBy: { createdAt: 'desc' },
+    const {
+      skip,
+      limit: take,
+      sortBy: sortField,
+      sortOrder: sortDir,
+    } = calculatePagination({
+      page: Number(page) || 1,
+      limit: Number(limit) || 10,
+      sortBy: (sortBy as string) || 'createdAt',
+      sortOrder: (sortOrder as string) || 'desc',
     });
 
-    res.json({ success: true, count: notices.length, data: notices });
+    const filters: any = {};
+
+    if (employeeName?.toString().trim()) {
+      filters.employeeName = {
+        contains: employeeName.toString(),
+        mode: 'insensitive',
+      };
+    }
+
+    if (targetType?.toString().trim()) {
+      filters.targetType = targetType.toString();
+    }
+
+    if (status?.toString().trim()) {
+      filters.status = status.toString() as NoticeStatus;
+    }
+
+    if (publishDate?.toString().trim()) {
+      const start = new Date(publishDate.toString());
+      start.setHours(0, 0, 0, 0);
+      const end = new Date(publishDate.toString());
+      end.setHours(23, 59, 59, 999);
+      filters.publishDate = { gte: start, lte: end };
+    }
+
+    // Fetch paginated notices
+    const notices = await prisma.notice.findMany({
+      where: Object.keys(filters).length > 0 ? filters : undefined,
+      orderBy: { [sortField]: sortDir },
+      skip,
+      take,
+    });
+
+    // Total notices matching filters
+    const total = await prisma.notice.count({
+      where: Object.keys(filters).length > 0 ? filters : undefined,
+    });
+
+    // Total published notices (Active)
+    const totalActive = await prisma.notice.count({
+      where: { status: 'PUBLISHED' },
+    });
+
+    // Total draft notices
+    const totalDraft = await prisma.notice.count({
+      where: { status: 'DRAFT' },
+    });
+
+    res.json({
+      success: true,
+      meta: {
+        page: Number(page) || 1,
+        limit: take,
+        total,
+        totalPages: Math.ceil(total / take),
+        totalActive,
+        totalDraft,
+      },
+      data: notices,
+    });
   } catch (error) {
+    console.error(error);
     res.status(500).json({
       success: false,
       message: 'Failed to fetch notices',

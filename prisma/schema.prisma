@@ -46,7 +46,7 @@ model Notice {
   publishDate DateTime
   targetType  TargetType
   noticeType  NoticeType
-  status      NoticeStatus @default(DRAFT)
+  status      NoticeStatus @default(PUBLISHED)
 
   employeeId   String? // optional
   employeeName String? // optional
