@@ -9,13 +9,10 @@ dotenv.config();
 const app = express();
 
 // Middleware
-app.use(
+app.options(
+  '*',
   cors({
-    origin: [
-      'http://localhost:3000',
-      'http://206.162.244.142:3019',
-      'http://206.162.244.142:3019',
-    ],
+    origin: ['http://localhost:3000', 'http://206.162.244.142:3019'],
     credentials: true,
   }),
 );
