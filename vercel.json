@@ -1,18 +1,10 @@
 {
   "version": 2,
-  "builds": [
-    {
-      "src": "dist/server.js",
-      "use": "@vercel/node"
-    }
-  ],
+  "builds": [{ "src": "server.js", "use": "@vercel/node" }],
   "routes": [
     {
       "src": "/(.*)",
-      "dest": "dist/server.js"
+      "dest": "server.js"
     }
-  ],
-  "env": {
-  "DATABASE_URL": "mongodb+srv://aburahatshaum889_db_user:JXg76aSnblrfGGYj@cluster0.wyxkvgh.mongodb.net/noticeDB?retryWrites=true&w=majority"
-}
+  ]
 }
