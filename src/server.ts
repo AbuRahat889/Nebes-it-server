@@ -9,28 +9,19 @@ dotenv.config();
 const app = express();
 
 // CORS setup - applied globally
-const allowedOrigins = ['http://localhost:3000', 'http://206.162.244.142:3019'];
+// const allowedOrigins = ['http://localhost:3000', 'http://206.162.244.142:3019'];
 
 app.use(
   cors({
-    origin: function (origin, callback) {
-      // allow requests with no origin (like Postman, curl)
-      if (!origin) return callback(null, true);
-
-      if (allowedOrigins.includes(origin)) {
-        return callback(null, true);
-      } else {
-        return callback(new Error('Not allowed by CORS'), false);
-      }
-    },
+    origin: [
+      'http://localhost:3000',
+      'http://206.162.244.142:3019',
+    ],
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization'], // required headers
+    allowedHeaders: ['Content-Type', 'Authorization'],
   }),
 );
-
-// Handle preflight requests for all routes
-app.options('*', cors());
 
 // Middleware
 app.use(express.json());
