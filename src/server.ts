@@ -9,7 +9,12 @@ dotenv.config();
 const app = express();
 
 // Middleware
-app.use(cors({ origin: ['http://localhost:3000'], credentials: true }));
+app.use(
+  cors({
+    origin: ['http://localhost:3000', 'http://206.162.244.142:3019'],
+    credentials: true,
+  }),
+);
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
